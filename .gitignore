@@ -1,0 +1,7 @@
+*.unityproj
+*.userprefs
+*.csproj
+*.pidb
+*.sln
+/TotallyEvil/Temp
+/TotallyEvil/Library
