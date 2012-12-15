@@ -5,6 +5,9 @@ using System.Collections.Generic;
 public class Main : MonoBehaviour {
 	//only use these after awake
 	public static int layerIgnoreRaycast;
+	public static int layerGround;
+	
+	public static int layerMaskGround;
 	
 	[System.NonSerialized] public UserSettings userSettings;
 	[System.NonSerialized] public UserData userData;
@@ -35,8 +38,9 @@ public class Main : MonoBehaviour {
 		mInstance = this;
 		
 		layerIgnoreRaycast = LayerMask.NameToLayer("Ignore Raycast");
+		layerGround = LayerMask.NameToLayer("Ground");
 		
-		//layerMaskPlayer = 1<<layerPlayer;
+		layerMaskGround = 1<<layerGround;
 		
 		DontDestroyOnLoad(gameObject);
 		

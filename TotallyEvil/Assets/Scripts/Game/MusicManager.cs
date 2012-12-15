@@ -105,7 +105,7 @@ public class MusicManager : MonoBehaviour {
 		case State.None:
 			break;
 		case State.Playing:
-			if(!mCurMusic.source.isPlaying) {
+			if(!(mCurMusic.source.loop || mCurMusic.source.isPlaying)) {
 				mCurMusic.source.Play((ulong)System.Math.Round(rate*((double)mCurMusic.loopDelay)));
 			}
 			break;

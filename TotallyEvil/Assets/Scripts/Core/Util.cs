@@ -52,6 +52,11 @@ public class Util {
 		return side;
 	}
 	
+	public static Vector2 Vector2DGetRight(Vector2 n, Vector2 dir) {
+		Vector2 nd = (Vector2.Dot(n, dir))*n;
+		return dir - nd;
+	}
+	
 	public static Vector2 MouseToScreen() {
 		return Camera.main.ScreenToWorldPoint(Input.mousePosition);
 	}
