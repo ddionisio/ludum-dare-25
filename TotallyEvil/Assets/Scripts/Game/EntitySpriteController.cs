@@ -6,6 +6,7 @@ public class EntitySpriteController : MonoBehaviour {
 	
 	protected tk2dBaseSprite mSprite;
 	protected tk2dAnimatedSprite mSpriteAnim;
+	protected tk2dStaticSpriteBatcher mSpriteBatcher; //
 	
 	private int[] mStateAnimIds;
 	
@@ -39,8 +40,9 @@ public class EntitySpriteController : MonoBehaviour {
 	}
 	
 	void Awake() {
+		mSpriteBatcher = GetComponent<tk2dStaticSpriteBatcher>();
 		mSprite = GetComponent<tk2dBaseSprite>();
-		mSpriteAnim = mSprite as tk2dAnimatedSprite;
+		mSpriteAnim = mSprite != null ? mSprite as tk2dAnimatedSprite : null;
 	}
 	
 	// Use this for initialization
@@ -55,9 +57,14 @@ public class EntitySpriteController : MonoBehaviour {
 			if(mBlinkTime >= blinkDelay) {
 				mBlinkTime = 0;
 				
-				Color c = mSprite.color;
-				c.a = c.a == 0.0f ? mPrevAlpha : 0.0f;
-				mSprite.color = c;
+				if(mSpriteBatcher != null) {
+					mSpriteBatcher.renderer.enabled = !mSpriteBatcher.renderer.enabled;
+				}
+				else {
+					Color c = mSprite.color;
+					c.a = c.a == 0.0f ? mPrevAlpha : 0.0f;
+					mSprite.color = c;
+				}
 			}
 		}
 	}
@@ -70,12 +77,20 @@ public class EntitySpriteController : MonoBehaviour {
 		mIsBlink = b;
 		
 		if(b) {
-			mPrevAlpha = mSprite.color.a;
+			if(mSprite != null) {
+				mPrevAlpha = mSprite.color.a;
+			}
+			
 			mBlinkTime = 0;
 		}
 		else {
-			Color clr = mSprite.color; clr.a = mPrevAlpha;
-			mSprite.color = clr;
+			if(mSpriteBatcher != null) {
+				mSpriteBatcher.renderer.enabled = true;
+			}
+			else {
+				Color clr = mSprite.color; clr.a = mPrevAlpha;
+				mSprite.color = clr;
+			}
 		}
 	}
 }

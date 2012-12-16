@@ -2,13 +2,17 @@ using UnityEngine;
 using System.Collections;
 
 public class Player : Entity {
+	public delegate void OnGuardUpdate(int cur, int max);
+	
 	[System.Serializable]
 	public class GuardData {
 		public GameObject guard;
 		public float delay;
 	}
 	
-	public float hurtDelay = 0.5f;
+	public event OnGuardUpdate guardUpdateCallback;
+	
+	public float hurtDelay = 1.0f;
 	public float attackHitJumpSpd = 120;
 	
 	public GameObject thornsIdle;
@@ -105,6 +109,12 @@ public class Player : Entity {
 			guards[mCurNumGuards].guard.SetActiveRecursively(false);
 			
 			mCurGuardRechargeTime = 0;
+			
+			Blink(hurtDelay);
+			
+			if(guardUpdateCallback != null) {
+				guardUpdateCallback(mCurNumGuards, guards.Length);
+			}
 		}
 	}
 	
@@ -114,6 +124,10 @@ public class Player : Entity {
 		}
 		
 		mCurNumGuards = guards.Length;
+		
+		if(guardUpdateCallback != null) {
+			guardUpdateCallback(mCurNumGuards, guards.Length);
+		}
 	}
 	
 	void OnDestroy() {
@@ -192,9 +206,15 @@ public class Player : Entity {
 			if(mCurGuardRechargeTime >= guards[mCurNumGuards].delay) {
 				mCurGuardRechargeTime -= guards[mCurNumGuards].delay;
 				
-				guards[mCurNumGuards].guard.SetActiveRecursively(true);
+				if(mGuardActive) {
+					guards[mCurNumGuards].guard.SetActiveRecursively(true);
+				}
 				
 				mCurNumGuards++;
+				
+				if(guardUpdateCallback != null) {
+					guardUpdateCallback(mCurNumGuards, guards.Length);
+				}
 			}
 		}
 	}
@@ -234,6 +254,12 @@ public class Player : Entity {
 			}
 		}
 		else if(!isBlinking && hit.transform.gameObject.layer == Main.layerEnemyProjectile) {
+			EnemyProjectile proj = hit.transform.GetComponentInChildren<EnemyProjectile>();
+			if(proj == null) { //try parent
+				proj = hit.transform.parent.GetComponentInChildren<EnemyProjectile>();
+			}
+			
+			hurtAmt = proj.damage;
 		}
 		
 		if(hurtAmt > 0) {
@@ -241,7 +267,14 @@ public class Player : Entity {
 				GuardDec();
 			}
 			else {
-				stat.curHP -= hurtAmt;
+				//decrease from points first
+				PlayerStat ps = (PlayerStat)stat;
+				if(ps.curLevelPts > 0) {
+					ps.curLevelPts -= hurtAmt;
+				}
+				else {
+					stat.curHP -= hurtAmt;
+				}
 			}
 		}
 	}
@@ -250,9 +283,14 @@ public class Player : Entity {
 		PlayerStat pstat = (PlayerStat)stat;
 		
 		if(pstat.curHP == 0) {
-			Debug.Log("dead");
-			//game over?
-			//need to level down?
+			//decrease level
+			SceneWorld sw = SceneWorld.instance;
+			if(sw.curLevel > 0) {
+				sw.curLevel--;
+			}
+			else {
+				Debug.Log("gameover");
+			}
 		}
 		else if(delta < 0) {
 			Blink(hurtDelay);
@@ -261,19 +299,33 @@ public class Player : Entity {
 	
 	void OnLevelPointsChange(PlayerStat stat, float delta) {
 		if(stat.curLevelPts >= stat.maxLevelPts) {
-			Debug.Log("level up!");
+			//Debug.Log("level up!");
+			SceneWorld sw = SceneWorld.instance;
+			if(sw.curLevel < sw.levels.Length-1) {
+				sw.curLevel++;
+			}
+			else {
+				Debug.Log("win");
+			}
+		}
+		else if(delta < 0) {
+			Blink(hurtDelay);
 		}
 	}
 	
 	void OnLevelChangeStart() {
 		mController.enabled = false;
+		
 		entMove.ResetAll();
 		entMove.enabled = false;
+		
+		entCollider.enabled = false;
 	}
 	
 	void OnLevelChangeEnd(SceneWorld.LevelData level) {
 		mController.enabled = true;
 		entMove.enabled = true;
+		entCollider.enabled = true;
 	}
 	
 	void OnUIModalActive() {

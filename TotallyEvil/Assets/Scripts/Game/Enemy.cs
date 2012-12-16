@@ -8,6 +8,12 @@ public class AIState : Sequencer.StateInstance {
 }
 
 public class Enemy : Entity {
+	public enum Melee {
+		Off,
+		PointToPlayer,
+		PointToDir
+	}
+	
 	public string[] afterSpawnAIState;
 	
 	public float dieDelay = 0.25f;
@@ -21,6 +27,27 @@ public class Enemy : Entity {
 	private string mAICurState;
 	private string mLastAIState;
 	
+	private Melee mMeleeMode = Melee.Off;
+	private EnemyProjectile mMelee;
+	
+	public Melee meleeMode {
+		get { return mMeleeMode; }
+		set {
+			mMeleeMode = value;
+			if(mMelee != null) {
+				switch(mMeleeMode) {
+				case Melee.Off:
+					mMelee.gameObject.SetActiveRecursively(false);
+					break;
+					
+				case Melee.PointToDir:
+				case Melee.PointToPlayer:
+					mMelee.gameObject.SetActiveRecursively(true);
+					break;
+				}
+			}
+		}
+	}
 	
 	//AI
 	public void AIStop() {
@@ -72,7 +99,7 @@ public class Enemy : Entity {
 	
 	protected override void SpawnFinish() {
 		if(afterSpawnAIState.Length > 0) {
-			AISetState(afterSpawnAIState[Random.Range(0, afterSpawnAIState.Length-1)]);
+			AISetState(afterSpawnAIState[Random.Range(0, afterSpawnAIState.Length)]);
 		}
 	}
 	
@@ -90,6 +117,10 @@ public class Enemy : Entity {
 	
 	protected override void StateChanged() {
 		switch(state) {
+		case State.spawning:
+			meleeMode = Melee.Off;
+			break;
+			
 		case State.die:
 			Blink(dieDelay);
 			break;
@@ -108,6 +139,11 @@ public class Enemy : Entity {
 		if(stat != null) {
 			stat.hpChangeCallback += OnHPChange;
 		}
+		
+		//projectiles within enemies are considered melees
+		//default off
+		mMelee = GetComponentInChildren<EnemyProjectile>();
+		meleeMode = Melee.Off;
 	}
 	
 	// Use this for initialization
@@ -121,7 +157,28 @@ public class Enemy : Entity {
 	
 	// Update is called once per frame
 	void LateUpdate () {
-	
+		switch(state) {
+		case State.die:
+			break;
+		case State.spawning:
+			break;
+			
+		default:
+			if(mMelee != null) {
+				switch(mMeleeMode) {	
+				case Melee.PointToDir:
+					mMelee.transform.up = entMove.dir;
+					break;
+					
+				case Melee.PointToPlayer:
+					Player p = Player.instance;
+					Vector3 dir = (p.transform.position - transform.position).normalized;
+					mMelee.transform.up = dir;
+					break;
+				}
+			}
+			break;
+		}
 	}
 	
 	void OnHPChange(EntityStat stat, float delta) {

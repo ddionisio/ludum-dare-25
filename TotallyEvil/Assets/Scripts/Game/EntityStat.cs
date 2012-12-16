@@ -38,6 +38,12 @@ public class EntityStat : MonoBehaviour {
 		}
 	}
 	
+	public virtual void Refresh() {
+		if(hpChangeCallback != null) {
+			hpChangeCallback(this, 0);
+		}
+	}
+	
 	public virtual void ResetStats() {
 		mCurHP = _maxHP;
 	}

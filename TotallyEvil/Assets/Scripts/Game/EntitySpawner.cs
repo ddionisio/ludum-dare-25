@@ -75,7 +75,7 @@ public class EntitySpawner : MonoBehaviour {
 			
 			Entity ent = t.GetComponentInChildren<Entity>();
 			if(ent != null) {
-				ent.setStateCallback += OnEntitySetState;
+				ent.releaseCallback += OnEntityRelease;
 			}
 						
 			ChangeState(State.SpawnWait);
@@ -96,12 +96,8 @@ public class EntitySpawner : MonoBehaviour {
 		Gizmos.DrawIcon(transform.position, "spawner");
 	}
 	
-	void OnEntitySetState(Entity ent, Entity.State state) {
-		switch(state) {
-		case Entity.State.die:
-			ent.setStateCallback -= OnEntitySetState;
-			mCurNumActive--;
-			break;
-		}
+	void OnEntityRelease(Entity ent) {
+		ent.releaseCallback -= OnEntityRelease;
+		mCurNumActive--;
 	}
 }

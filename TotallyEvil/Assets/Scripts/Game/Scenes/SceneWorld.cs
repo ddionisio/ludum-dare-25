@@ -50,6 +50,7 @@ public class SceneWorld : SceneController {
 			CameraController.instance.bound = null;
 			
 			BroadcastMessage("OnLevelChangeStart", null, SendMessageOptions.DontRequireReceiver);
+			//HUDInterface.instance
 		}
 	}
 	
@@ -90,6 +91,20 @@ public class SceneWorld : SceneController {
 	}
 	
 	private void SetLevelData() {
+		//look for enemies > cur level, they need to be released
+		Enemy[] enemies = GetComponentsInChildren<Enemy>(false);
+		foreach(Enemy enemy in enemies) {
+			PoolDataController poolDat = enemy.GetComponentInChildren<PoolDataController>();
+			if(poolDat != null && poolDat.claimed) {
+				continue; //just in case...
+			}
+			
+			EnemyStat stat = enemy.stat != null ? enemy.stat as EnemyStat : null;
+			if(stat != null && stat.level > mCurLevel) {
+				enemy.Release();
+			}
+		}
+		
 		Player.instance.scale = levels[mCurLevel].scale;
 		Vector3 newP = levels[mCurLevel].bound.transform.position + levels[mCurLevel].bound.point;
 		newP.z = Player.instance.transform.position.z;

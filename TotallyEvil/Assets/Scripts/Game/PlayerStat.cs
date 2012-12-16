@@ -4,6 +4,8 @@ using System.Collections;
 public class PlayerStat : EntityStat {
 	public delegate void OnLevelPointsChange(PlayerStat stat, float delta);
 	
+	public delegate void OnLevelChange(PlayerStat stat, int level);
+	
 	[System.Serializable]
 	public class Level {
 		public float maxHP;
@@ -12,6 +14,7 @@ public class PlayerStat : EntityStat {
 	}
 	
 	public event OnLevelPointsChange levelPointsChangeCallback;
+	public event OnLevelChange levelChangeCallback;
 	
 	private Level mCurLevel;
 	private float mCurLevelPts;
@@ -44,6 +47,18 @@ public class PlayerStat : EntityStat {
 	public override float maxHP {
 		get { return mCurLevel == null ? 1.0f : mCurLevel.maxHP; }
 	}
+	
+	public override void Refresh() {
+		base.Refresh();
+		
+		if(levelPointsChangeCallback != null) {
+			levelPointsChangeCallback(this, 0);
+		}
+		
+		if(levelChangeCallback != null) {
+			levelChangeCallback(this, SceneWorld.instance.curLevel);
+		}
+	}
 			
 	protected override void Awake() {
 		base.Awake();
@@ -63,5 +78,7 @@ public class PlayerStat : EntityStat {
 		mCurLevel = level.stat;
 		mCurHP = maxHP;
 		mCurLevelPts = 0;
+		
+		Refresh();
 	}
 }

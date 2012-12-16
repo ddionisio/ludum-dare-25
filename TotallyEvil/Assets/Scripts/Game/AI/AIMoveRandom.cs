@@ -2,7 +2,13 @@ using UnityEngine;
 using System.Collections;
 
 public class AIMoveRandom : SequencerAction {
-	public bool xOnly = true;
+	public enum Type {
+		xOnly,
+		yOnly,
+		Both
+	}
+	
+	public Type type = Type.xOnly;
 	public Entity.State state = Entity.State.move;
 	public Entity.State endState = Entity.State.idle;
 	
@@ -21,8 +27,14 @@ public class AIMoveRandom : SequencerAction {
 			Vector2 src = ai.transform.position;
 			Vector2 dest = bound.RandomLocation(r, r);
 			
-			if(xOnly) {
+			switch(type) {
+			case Type.xOnly:
 				dest.y = src.y;
+				break;
+				
+			case Type.yOnly:
+				dest.x = src.x;
+				break;
 			}
 			
 			Vector2 dir = dest - src;

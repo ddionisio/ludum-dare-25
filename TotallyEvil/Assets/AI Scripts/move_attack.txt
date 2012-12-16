@@ -1,0 +1,41 @@
+{ "$type":"Sequencer",
+	"loop":true,
+	"actions": [
+		{ "$type":"AIMoveRandom", "delay":"0.1",
+			"state":"jump", "endState":"jump",
+			"type":"Both",
+			"minSpeed":"80",
+			"maxSpeed":"100"
+		},
+		
+		{ "$type":"AISetMeleeMode", "delay":"0.15", "mode":"PointToDir" },
+		
+		{ "$type":"AIMoveRandom",
+			"state":"jump", "endState":"jump",
+			"minSpeed":"90",
+			"maxSpeed":"120"
+		},
+		
+		{ "$type":"AIMoveRandom", "delay":"0.25",
+			"state":"jump", "endState":"jump",
+			"type":"yOnly",
+			"minSpeed":"90",
+			"maxSpeed":"120"
+		},
+		
+		{ "$type":"AIMoveRandom", "delay":"0.25",
+			"state":"jump", "endState":"jump",
+			"minSpeed":"90",
+			"maxSpeed":"120"
+		},
+		
+		{ "$type":"AIMoveRandom", "delay":"0.25",
+			"state":"jump", "endState":"jump",
+			"type":"yOnly",
+			"minSpeed":"90",
+			"maxSpeed":"120"
+		},
+		
+		{ "$type":"AISetMeleeMode", "delay":"1", "mode":"Off" }
+	]
+}

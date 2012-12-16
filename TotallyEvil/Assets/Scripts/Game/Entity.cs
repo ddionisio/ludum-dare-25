@@ -14,6 +14,7 @@ public class Entity : MonoBehaviour {
 		
 		hurt,
 		die,
+		scared, //just for angel 1's
 		
 		NumState
 	}
@@ -27,6 +28,7 @@ public class Entity : MonoBehaviour {
 	public event OnSetState setStateCallback = null;
 	public event OnSetBool setBlinkCallback = null;
 	public event OnFinish spawnFinishCallback = null;
+	public event OnFinish releaseCallback = null;
 	
 	private EntityStat mEntStat = null;
 	private EntityMovement mEntMove = null;
@@ -100,6 +102,10 @@ public class Entity : MonoBehaviour {
 	}
 	
 	public virtual void Release() {
+		if(releaseCallback != null) {
+			releaseCallback(this);
+		}
+		
 		StopAllCoroutines();
 		EntityManager.instance.Release(transform);
 	}

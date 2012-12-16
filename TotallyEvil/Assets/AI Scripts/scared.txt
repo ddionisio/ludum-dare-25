@@ -1,0 +1,12 @@
+{ "$type":"Sequencer",
+	"loop":true,
+	"actions": [
+		{ "$type":"AIMoveRandom",
+			"state":"scared",
+			"minSpeed":"75",
+			"maxSpeed":"120"
+		},
+		
+		{ "$type":"SequencerAction", "delay":"0.5" }
+	]
+}
