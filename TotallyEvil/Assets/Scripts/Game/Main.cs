@@ -6,8 +6,14 @@ public class Main : MonoBehaviour {
 	//only use these after awake
 	public static int layerIgnoreRaycast;
 	public static int layerGround;
+	public static int layerEnemy;
+	public static int layerEnemyProjectile;
+	public static int layerStructure;
 	
 	public static int layerMaskGround;
+	public static int layerMaskEnemy;
+	public static int layerMaskEnemyProjectile;
+	public static int layerMaskStructure;
 	
 	[System.NonSerialized] public UserSettings userSettings;
 	[System.NonSerialized] public UserData userData;
@@ -39,8 +45,15 @@ public class Main : MonoBehaviour {
 		
 		layerIgnoreRaycast = LayerMask.NameToLayer("Ignore Raycast");
 		layerGround = LayerMask.NameToLayer("Ground");
-		
+		layerEnemy = LayerMask.NameToLayer("Enemy");
+		layerEnemyProjectile = LayerMask.NameToLayer("EnemyProjectile");
+		layerStructure = LayerMask.NameToLayer("Structure");
+	
+			
 		layerMaskGround = 1<<layerGround;
+		layerMaskEnemy = 1<<layerEnemy;
+		layerMaskEnemyProjectile = 1<<layerEnemyProjectile;
+		layerMaskStructure = 1<<layerStructure;
 		
 		DontDestroyOnLoad(gameObject);
 		

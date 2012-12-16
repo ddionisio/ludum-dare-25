@@ -7,19 +7,36 @@ public class PlayerController : MonoBehaviour {
 	public float jumpSpeed;
 	public int maxJump = 2;
 	
+	public float maxSpeedScaleAttack = 1.0f;
+	
 	
 	private Player mPlayer;
 	private float mMoveX;
 	private bool mReleased=true;
 	
+	private float mMaxSpeedAttackSqr;
+	
+	public void RefreshMaxSpeedAttackSqr() {
+		mMaxSpeedAttackSqr = mPlayer.entMove.maxSpeed*mPlayer.entMove.maxSpeed*maxSpeedScaleAttack;
+	}
+	
 	void Awake () {
 		mPlayer = GetComponent<Player>();
+		
+		RefreshMaxSpeedAttackSqr();
 	}
 	
 	// Use this for initialization
 	void Start () {
-		mPlayer.entMove.onDirXChange = OnDirXChange;
-		mPlayer.entMove.onLandGround = OnLandGround;
+		mPlayer.entMove.onDirXChange += OnDirXChange;
+		mPlayer.entMove.onLandGround += OnLandGround;
+	}
+	
+	void OnDisable() {
+		mReleased = true;
+		
+		if(mPlayer != null && mPlayer.entMove != null)
+			mPlayer.entMove.ResetMotion();
 	}
 	
 	// Update is called once per frame
@@ -32,17 +49,17 @@ public class PlayerController : MonoBehaviour {
 			mMoveX = Mathf.Sign(mMoveX);
 			
 			if(entMove.accel.x == 0) {
-				entMove.accel.x = mMoveX*moveAccel;
+				entMove.accel.x = mMoveX*moveAccel*mPlayer.scale;
 			}
 			else if(Mathf.Sign(entMove.accel.x) != mMoveX) {
-				entMove.accel.x = 2.0f*mMoveX*moveAccel; //change dir asap
+				entMove.accel.x = 2.0f*mMoveX*moveAccel*mPlayer.scale; //change dir asap
 			}
 			
 			mReleased = false;
 		}
 		else if(!mReleased) {
 			if(entMove.jumpCounter == 0 && Mathf.Sign(entMove.accel.x) == Mathf.Sign(entMove.velocity.x)) {
-				Debug.Log("move accel: "+entMove.accel.x);
+				//Debug.Log("move accel: "+entMove.accel.x);
 				entMove.accel.x *= -2; //"brakes"
 			}
 			
@@ -51,8 +68,17 @@ public class PlayerController : MonoBehaviour {
 		
 		if(entMove.jumpCounter < maxJump) {
 			if(Input.GetButtonDown("Jump")) {
-				entMove.Jump(jumpSpeed);
+				entMove.Jump(jumpSpeed*mPlayer.scale);
 			}
+		}
+		
+		mPlayer.guardActive = Input.GetButton("Guard");
+		
+		if(!mPlayer.guardActive && (!entMove.isGround || entMove.curSpeedSqr >= mMaxSpeedAttackSqr)) {
+			mPlayer.state = Entity.State.attack; 
+		}
+		else {
+			mPlayer.state = mPlayer.guardActive ? Entity.State.guard : Entity.State.idle;
 		}
 	}
 	
@@ -62,13 +88,13 @@ public class PlayerController : MonoBehaviour {
 			entMove.velocity.x = 0;
 		}
 		else {
-			mPlayer.entMove.accel.x = mMoveX*moveAccel;
+			mPlayer.entMove.accel.x = mMoveX*moveAccel*mPlayer.scale;
 		}
 	}
 	
 	void OnLandGround(EntityMovement entMove) {
 		if(mReleased && Mathf.Sign(entMove.accel.x) == Mathf.Sign(entMove.velocity.x)) {
-			Debug.Log("land accel: "+entMove.accel.x);
+			//Debug.Log("land accel: "+entMove.accel.x);
 			entMove.accel.x *= -2; //"brakes"
 		}
 	}

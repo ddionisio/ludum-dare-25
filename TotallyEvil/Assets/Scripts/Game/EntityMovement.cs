@@ -8,6 +8,8 @@ public class EntityMovement : MonoBehaviour {
 	
 	public bool applyGravity = true;
 	public bool applyOrientation = true;
+	public bool capToWorld = true;
+	public bool capToCameraBounds = true;
 	
 	public tk2dBaseSprite orientXSprite = null; //for horizontal orientation
 	
@@ -21,17 +23,17 @@ public class EntityMovement : MonoBehaviour {
 	[System.NonSerialized]
 	public Vector2 accel;
 	
-	public Callback onLandGround = null;
-	public Callback onDirXChange = null;
+	public event Callback onLandGround = null;
+	public event Callback onDirXChange = null;
 	
 	private int mJumpCounter = 0;
 	private bool mIsGround = false;
 	
 	private float mCurYVel;
-	private float mMaxSpeedSq;
+	private float mMaxSpeedSqr;
 	private Vector2 mDir = Vector2.zero;
 	
-	private bool mIsMaxSpeed = false;
+	private float mCurSpeedSqr = 0;
 	
 	private float mDX = 0;
 	
@@ -43,12 +45,23 @@ public class EntityMovement : MonoBehaviour {
 		get { return mCurYVel; }
 	}
 	
-	public bool isMaxSpeed {
-		get { return mIsMaxSpeed; }
+	public float curSpeedSqr {
+		get { return mCurSpeedSqr; }
 	}
 	
 	public int jumpCounter {
 		get { return mJumpCounter; }
+	}
+	
+	public bool isGround {
+		get { return mIsGround; }
+	}
+	
+	public void ResetAll() {
+		ResetMotion();
+		ResetJumpCounter();
+		ResetCurYVel();
+		mIsGround = false;
 	}
 	
 	//set velocity and accel to 0
@@ -73,14 +86,23 @@ public class EntityMovement : MonoBehaviour {
 		mCurYVel = 0.0f;
 	}
 	
+	public void RefreshMaxSpdSqr() {
+		mMaxSpeedSqr = maxSpeed*maxSpeed;
+	}
+	
 	void Awake() {
-		mMaxSpeedSq = maxSpeed*maxSpeed;
+		RefreshMaxSpdSqr();
 		
 		if(radius == 0) {
 			SphereCollider sc = GetComponentInChildren<SphereCollider>();
 			if(sc != null) {
 				radius = sc.radius;
 			}
+		}
+		
+		EntityCollider entCollider = GetComponent<EntityCollider>();
+		if(entCollider != null) {
+			entCollider.radius = radius;
 		}
 	}
 	
@@ -91,7 +113,7 @@ public class EntityMovement : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 #if UNITY_EDITOR
-		mMaxSpeedSq = maxSpeed*maxSpeed;
+		RefreshMaxSpdSqr();
 #endif
 		World world = World.instance;
 						
@@ -109,24 +131,24 @@ public class EntityMovement : MonoBehaviour {
 			velocity += accel*Time.deltaTime;
 		}
 		
+		mCurSpeedSqr = velocity.sqrMagnitude;
+		
 		//cap velocity
-		if(maxSpeed > 0) {
+		if(maxSpeed > 0 && mCurSpeedSqr > mMaxSpeedSqr) {
 			if(velocity.y == 0) {
-				if(velocity.x > maxSpeed) {
+				if(velocity.x > 0) {
 					velocity.x = maxSpeed;
+					mCurSpeedSqr = mMaxSpeedSqr;
 				}
-				else if(velocity.x < -maxSpeed) {
+				else if(velocity.x < 0) {
 					velocity.x = -maxSpeed;
+					mCurSpeedSqr = mMaxSpeedSqr;
 				}
-				
-				mIsMaxSpeed = false;
 			}
 			else {
-				mIsMaxSpeed = velocity.sqrMagnitude > mMaxSpeedSq;
-				if(mIsMaxSpeed) {
-					velocity.Normalize();
-					velocity *= maxSpeed;
-				}
+				velocity.Normalize();
+				velocity *= maxSpeed;
+				mCurSpeedSqr = mMaxSpeedSqr;
 			}
 		}
 		
@@ -143,10 +165,12 @@ public class EntityMovement : MonoBehaviour {
 															
 			//adjust to ground
 			//for now it's flat
-			RaycastHit hit;
-			if((!mIsGround || dPos.y > 0.0f) && Physics.SphereCast(curPos, radius, mDir, out hit, dist, Main.layerMaskGround)) {
+			float newY = newPos.y + dPos.y;
+			float newCapY = capToWorld ? world.CapGround(newY, radius) : newY;
+			
+			if(newY != newCapY) {
 				newPos.x += dPos.x;
-				newPos.y = hit.point.y + radius;
+				newPos.y = newCapY;
 				
 				mCurYVel = 0;
 				mJumpCounter = 0;
@@ -160,7 +184,8 @@ public class EntityMovement : MonoBehaviour {
 				}
 			}
 			else {
-				newPos += dPos;
+				newPos.x = newPos.x + dPos.x;
+				newPos.y = newY;
 			}
 			
 			//direction X changed
@@ -190,7 +215,24 @@ public class EntityMovement : MonoBehaviour {
 			
 			pos.x = newPos.x;
 			pos.y = newPos.y;
-			transform.position = pos;
+			
+			if(capToCameraBounds) {
+				CameraBound camBound = CameraController.instance.bound;
+				if(camBound != null) {
+					Vector3 capPos = camBound.Cap(pos, radius, radius);
+					if(capPos != pos) {
+						accel = velocity = Vector2.zero;
+					}
+					
+					transform.position = capPos;
+				}
+				else {
+					transform.position = pos;
+				}
+			}
+			else {
+				transform.position = pos;
+			}
 		}
 	}
 }
