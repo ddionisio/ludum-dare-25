@@ -21,6 +21,7 @@ public class Enemy : Entity {
 	private string mAICurState;
 	private string mLastAIState;
 	
+	
 	//AI
 	public void AIStop() {
 		if(mAIStateInstance != null) {
@@ -80,6 +81,8 @@ public class Enemy : Entity {
 			//spawn giblets
 			
 			//spawn essence
+			EnemyStat es = (EnemyStat)stat;
+			Essence.Generate(transform.position, es.essencePoints, es.essenceScale);
 			
 			Release();
 		}

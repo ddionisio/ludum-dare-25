@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections;
 
 public class PlayerStat : EntityStat {
-	public delegate void OnLevelPointsChange(PlayerStat stat);
+	public delegate void OnLevelPointsChange(PlayerStat stat, float delta);
 	
 	[System.Serializable]
 	public class Level {
@@ -20,16 +20,21 @@ public class PlayerStat : EntityStat {
 		get { return mCurLevelPts; }
 		set { 
 			if(mCurLevelPts != value) {
+				float prevPts = mCurLevelPts;
 				mCurLevelPts = value;
 				if(mCurLevel != null && mCurLevelPts > mCurLevel.nextLevelPoints) {
 					mCurLevelPts = mCurLevel.nextLevelPoints;
 				}
 				
 				if(levelPointsChangeCallback != null) {
-					levelPointsChangeCallback(this);
+					levelPointsChangeCallback(this, mCurLevelPts - prevPts);
 				}
 			}
 		}
+	}
+	
+	public float maxLevelPts {
+		get { return mCurLevel == null ? 0.0f : mCurLevel.nextLevelPoints; }
 	}
 	
 	public override float damage {

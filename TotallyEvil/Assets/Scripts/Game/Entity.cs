@@ -125,7 +125,7 @@ public class Entity : MonoBehaviour {
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	private void Update () {
 		switch(mState) {
 		case State.spawning:
 			mEntCurTime += Time.deltaTime;

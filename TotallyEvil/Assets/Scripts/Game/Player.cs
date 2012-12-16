@@ -8,6 +8,7 @@ public class Player : Entity {
 		public float delay;
 	}
 	
+	public float hurtDelay = 0.5f;
 	public float attackHitJumpSpd = 120;
 	
 	public GameObject thornsIdle;
@@ -199,33 +200,49 @@ public class Player : Entity {
 	}
 	
 	void OnCollide(EntityCollider collider, RaycastHit hit) {
+		float hurtAmt = 0;
+		
 		if(hit.transform.gameObject.layer == Main.layerEnemy) {
 			Enemy enemy = hit.transform.GetComponentInChildren<Enemy>();
 			if(enemy.state != State.die) {
 				EnemyStat enemyStat = enemy.stat != null ? enemy.stat as EnemyStat : null;
-												
-				if(state == State.attack
-					&& !enemy.isBlinking 
-					&& enemy.state != State.spawning
-					&& enemyStat != null) {
-					enemyStat.curHP -= stat.damage;
-				}
-				
-				if(enemyStat != null && enemyStat.level >= SceneWorld.instance.curLevel) {
-					Vector3 enemyPos = hit.transform.position;
-					Vector3 pos = transform.position;
-													
-					if(pos.y > enemyPos.y) {
-						entMove.Jump(attackHitJumpSpd*mScale, false);
+				if(enemyStat != null) {
+					if(state == State.attack) {
+						if(!isBlinking
+							&& !enemy.isBlinking 
+							&& enemy.state != State.spawning) {
+							enemyStat.curHP -= stat.damage;
+						}
 					}
-					else {
-						entMove.ResetCurYVel();
-						entMove.Jump(-attackHitJumpSpd*mScale, false);
+					else if(enemyStat.damage > 0) {
+						hurtAmt = enemyStat.damage;
+					}
+					
+					if(enemyStat.level >= SceneWorld.instance.curLevel) {
+						Vector3 enemyPos = hit.transform.position;
+						Vector3 pos = transform.position;
+														
+						if(pos.y > enemyPos.y) {
+							entMove.Jump(attackHitJumpSpd*mScale, false);
+						}
+						else {
+							entMove.ResetCurYVel();
+							entMove.Jump(-attackHitJumpSpd*mScale, false);
+						}
 					}
 				}
 			}
 		}
-		else if(hit.transform.gameObject.layer == Main.layerEnemyProjectile) {
+		else if(!isBlinking && hit.transform.gameObject.layer == Main.layerEnemyProjectile) {
+		}
+		
+		if(hurtAmt > 0) {
+			if(guardActive && mCurNumGuards > 0) {
+				GuardDec();
+			}
+			else {
+				stat.curHP -= hurtAmt;
+			}
 		}
 	}
 	
@@ -233,14 +250,19 @@ public class Player : Entity {
 		PlayerStat pstat = (PlayerStat)stat;
 		
 		if(pstat.curHP == 0) {
+			Debug.Log("dead");
 			//game over?
 			//need to level down?
 		}
-		else {
+		else if(delta < 0) {
+			Blink(hurtDelay);
 		}
 	}
 	
-	void OnLevelPointsChange(PlayerStat stat) {
+	void OnLevelPointsChange(PlayerStat stat, float delta) {
+		if(stat.curLevelPts >= stat.maxLevelPts) {
+			Debug.Log("level up!");
+		}
 	}
 	
 	void OnLevelChangeStart() {
