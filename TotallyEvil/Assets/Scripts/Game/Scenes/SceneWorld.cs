@@ -34,22 +34,43 @@ public class SceneWorld : SceneController {
 		get { return mCurLevel; }
 		
 		set {
-			mNextLevel = value;
-			
-			mCurChangeTime = 0;
-			
-			mPlayerChangeStartPos = Player.instance.transform.position;
-			mPlayerChangeEndPos = levels[mNextLevel].bound.transform.position + levels[mNextLevel].bound.point;
-			mPlayerChangeEndPos.z = mPlayerChangeStartPos.z;
-			
-			mCamChangeStartPos = CameraController.instance.transform.position;
-			mCamChangeEndPos = mPlayerChangeEndPos;
-			mCamChangeEndPos.z = mCamChangeStartPos.z;
-			
-			CameraController.instance.attach = null;
-			CameraController.instance.bound = null;
-			
-			BroadcastMessage("OnLevelChangeStart", null, SendMessageOptions.DontRequireReceiver);
+			if(value >= levels.Length) {
+				//show victory
+				//all enemies released
+				Enemy[] enemies = GetComponentsInChildren<Enemy>(false);
+				foreach(Enemy enemy in enemies) {
+					PoolDataController poolDat = enemy.GetComponentInChildren<PoolDataController>();
+					if(poolDat == null || !poolDat.claimed) { //just in case...
+						enemy.Release(); 
+					}
+				}
+				
+				//deactivate spawners
+				EntitySpawner[] spawners = GetComponentsInChildren<EntitySpawner>(false);
+				foreach(EntitySpawner es in spawners) {
+					es.Activate(false);
+				}
+				
+				UIModalManager.instance.ModalOpen(UIModalManager.Modal.Victory);
+			}
+			else {
+				mNextLevel = value;
+				
+				mCurChangeTime = 0;
+				
+				mPlayerChangeStartPos = Player.instance.transform.position;
+				mPlayerChangeEndPos = levels[mNextLevel].bound.transform.position + levels[mNextLevel].bound.point;
+				mPlayerChangeEndPos.z = mPlayerChangeStartPos.z;
+				
+				mCamChangeStartPos = CameraController.instance.transform.position;
+				mCamChangeEndPos = mPlayerChangeEndPos;
+				mCamChangeEndPos.z = mCamChangeStartPos.z;
+				
+				CameraController.instance.attach = null;
+				CameraController.instance.bound = null;
+				
+				BroadcastMessage("OnLevelChangeStart", null, SendMessageOptions.DontRequireReceiver);
+			}
 			//HUDInterface.instance
 		}
 	}
@@ -58,10 +79,7 @@ public class SceneWorld : SceneController {
 	protected override void Start () {
 		base.Start();
 		
-		mDefaultGravity = World.instance.gravity;
-		
-		//start at the first level
-		SetLevelData();
+		StartCoroutine(DelayStart());
 	}
 	
 	// Update is called once per frame
@@ -88,6 +106,28 @@ public class SceneWorld : SceneController {
 		if(Input.GetKeyDown(KeyCode.F1)) {
 			curLevel = curLevel+1;
 		}
+		
+		if(Input.GetButtonDown("Menu")) {
+			UIModalManager uimgr = UIModalManager.instance;
+			if(uimgr.ModalGetTop() == UIModalManager.Modal.GameOptions) {
+				Main.instance.sceneManager.Resume();
+				uimgr.ModalCloseTop();
+			}
+			else if(uimgr.ModalGetTop() == UIModalManager.Modal.NumModal) {
+				Main.instance.sceneManager.Pause();
+				uimgr.ModalOpen(UIModalManager.Modal.GameOptions);
+			}
+		}
+	}
+	
+	IEnumerator DelayStart() {
+		yield return new WaitForSeconds(0.1f);
+		
+		mDefaultGravity = World.instance.gravity;
+		
+		SetLevelData();
+		
+		yield break;
 	}
 	
 	private void SetLevelData() {

@@ -6,12 +6,10 @@ public class UIModalManager : MonoBehaviour {
 	public enum Modal {
 		Start,
 		GameOptions,
-		LevelSelect,
 		HowToPlay,
 		Victory,
 		GameOver,
 		Confirm,
-		Dialog,
 		
 		NumModal
 	}
@@ -27,6 +25,8 @@ public class UIModalManager : MonoBehaviour {
 	}
 	
 	public UIData[] uis;
+	
+	public Modal openOnStart = Modal.NumModal;
 	
 	public static UIModalManager instance {
 		get {
@@ -167,6 +167,12 @@ public class UIModalManager : MonoBehaviour {
 			}
 			
 			uid.type = (Modal)i;//System.Enum.Parse(typeof(Modal), uid.name);
+		}
+	}
+	
+	void Start() {
+		if(openOnStart != Modal.NumModal) {
+			ModalOpen(openOnStart);
 		}
 	}
 }

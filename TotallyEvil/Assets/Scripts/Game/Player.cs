@@ -20,6 +20,12 @@ public class Player : Entity {
 			
 	public GuardData[] guards;
 	
+	public float deathDelay;
+	
+	public float gibletMinScale = 1.0f;
+	public float gibletMaxScale = 1.0f;
+	public int numGiblets = 1;
+	
 	private static Player mInstance;
 	
 	private bool mGuardActive=false;
@@ -27,10 +33,6 @@ public class Player : Entity {
 	private float mCurGuardRechargeTime;
 	
 	private float mScale = 1.0f;
-	
-	private tk2dBaseSprite[] mSprites;
-	private Vector2[] mSpriteDefaultScales;
-	private tk2dStaticSpriteBatcher[] mSpriteBatches;
 	
 	private EntityRotateVelocity mRotVel;
 	
@@ -51,20 +53,9 @@ public class Player : Entity {
 			if(mScale != value) {
 				mScale = value;
 				
-				for(int i = 0; i < mSprites.Length; i++) {
-					tk2dBaseSprite spr = mSprites[i];
-					Vector3 s = spr.scale;
-					s.x = Mathf.Sign(s.x)*mSpriteDefaultScales[i].x*mScale;
-					s.y = Mathf.Sign(s.y)*mSpriteDefaultScales[i].y*mScale;
-					spr.scale = s;
-				}
-				
-				foreach(tk2dStaticSpriteBatcher sprB in mSpriteBatches) {
-					Vector3 s = sprB.scale;
-					s.x = Mathf.Sign(s.x)*mScale;
-					s.y = Mathf.Sign(s.y)*mScale;
-					sprB.scale = s;
-				}
+				Vector3 s = transform.localScale;
+				s.x = s.y = mScale;
+				transform.localScale = s;
 				
 				if(entCollider != null) {
 					entCollider.radius = mDefaultRadius*mScale;
@@ -137,14 +128,6 @@ public class Player : Entity {
 	protected override void Awake () {
 		base.Awake();
 		
-		mSprites = GetComponentsInChildren<tk2dBaseSprite>(true);
-		mSpriteDefaultScales = new Vector2[mSprites.Length];
-		for(int i = 0; i < mSprites.Length; i++) {
-			mSpriteDefaultScales[i] = mSprites[i].scale;
-		}
-		
-		mSpriteBatches = GetComponentsInChildren<tk2dStaticSpriteBatcher>(true);
-		
 		mRotVel = GetComponentInChildren<EntityRotateVelocity>();
 		
 		mDefaultRotateSpd = mRotVel.rotatePerMeter;
@@ -181,6 +164,16 @@ public class Player : Entity {
 		}
 	}
 	
+	protected override void SetBlink(bool blink) {
+		if(!blink) {
+			if(state == Entity.State.die) {
+				gameObject.SetActiveRecursively(false);
+				
+				UIModalManager.instance.ModalOpen(UIModalManager.Modal.GameOver);
+			}
+		}
+	}
+	
 	protected override void StateChanged() {
 		switch(prevState) {
 		case State.attack:
@@ -190,6 +183,19 @@ public class Player : Entity {
 		}
 		
 		switch(state) {
+		case State.die:
+			mController.enabled = false;
+			
+			entMove.ResetAll();
+			entMove.enabled = false;
+			
+			entCollider.enabled = false;
+			
+			Blink(deathDelay);
+			
+			Giblet.Generate(transform.position, numGiblets, Random.Range(gibletMinScale, gibletMaxScale)*mScale);
+			break;
+			
 		case State.idle:
 			break;
 			
@@ -254,12 +260,18 @@ public class Player : Entity {
 			}
 		}
 		else if(!isBlinking && hit.transform.gameObject.layer == Main.layerEnemyProjectile) {
-			EnemyProjectile proj = hit.transform.GetComponentInChildren<EnemyProjectile>();
-			if(proj == null) { //try parent
-				proj = hit.transform.parent.GetComponentInChildren<EnemyProjectile>();
+			EnemyBullet bullet = hit.transform.GetComponentInChildren<EnemyBullet>();
+			if(bullet != null) {
+				hurtAmt = bullet.damage;
 			}
-			
-			hurtAmt = proj.damage;
+			else {
+				EnemyProjectile proj = hit.transform.GetComponentInChildren<EnemyProjectile>();
+				if(proj == null) { //try parent
+					proj = hit.transform.parent.GetComponentInChildren<EnemyProjectile>();
+				}
+				
+				hurtAmt = proj.damage;
+			}
 		}
 		
 		if(hurtAmt > 0) {
@@ -289,7 +301,7 @@ public class Player : Entity {
 				sw.curLevel--;
 			}
 			else {
-				Debug.Log("gameover");
+				state = Entity.State.die;
 			}
 		}
 		else if(delta < 0) {
@@ -301,12 +313,7 @@ public class Player : Entity {
 		if(stat.curLevelPts >= stat.maxLevelPts) {
 			//Debug.Log("level up!");
 			SceneWorld sw = SceneWorld.instance;
-			if(sw.curLevel < sw.levels.Length-1) {
-				sw.curLevel++;
-			}
-			else {
-				Debug.Log("win");
-			}
+			sw.curLevel++;
 		}
 		else if(delta < 0) {
 			Blink(hurtDelay);
@@ -326,6 +333,8 @@ public class Player : Entity {
 		mController.enabled = true;
 		entMove.enabled = true;
 		entCollider.enabled = true;
+		
+		entMove.ResetAll();
 	}
 	
 	void OnUIModalActive() {

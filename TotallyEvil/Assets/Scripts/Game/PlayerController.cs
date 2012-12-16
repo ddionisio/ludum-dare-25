@@ -22,12 +22,12 @@ public class PlayerController : MonoBehaviour {
 	
 	void Awake () {
 		mPlayer = GetComponent<Player>();
-		
-		RefreshMaxSpeedAttackSqr();
 	}
 	
 	// Use this for initialization
 	void Start () {
+		RefreshMaxSpeedAttackSqr();
+		
 		mPlayer.entMove.onDirXChange += OnDirXChange;
 		mPlayer.entMove.onLandGround += OnLandGround;
 	}

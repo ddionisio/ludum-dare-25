@@ -123,6 +123,8 @@ public class Enemy : Entity {
 			
 		case State.die:
 			Blink(dieDelay);
+			
+			Giblet.Generate(transform.position, numGiblets, Random.Range(gibletMinScale, gibletMaxScale));
 			break;
 		}
 	}
@@ -167,7 +169,9 @@ public class Enemy : Entity {
 			if(mMelee != null) {
 				switch(mMeleeMode) {	
 				case Melee.PointToDir:
-					mMelee.transform.up = entMove.dir;
+					if(entMove.dir != Vector2.zero) {
+						mMelee.transform.up = entMove.dir;
+					}
 					break;
 					
 				case Melee.PointToPlayer:

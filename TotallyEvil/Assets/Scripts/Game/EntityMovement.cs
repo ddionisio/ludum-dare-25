@@ -4,7 +4,7 @@ using System.Collections;
 public class EntityMovement : MonoBehaviour {
 	public delegate void Callback(EntityMovement entMove);
 	
-	public const float maxYVelCap = 600.0f;
+	public const float maxYVelCap = 7500.0f;
 	
 	public bool applyGravity = true;
 	public bool applyOrientation = true;

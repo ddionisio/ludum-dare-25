@@ -78,12 +78,20 @@ public class SceneManager : MonoBehaviour {
 		}
 		
 		BroadcastMessage("OnScenePause", null, SendMessageOptions.DontRequireReceiver);
+		
+		if(mSceneController != null) {
+			mSceneController.BroadcastMessage("OnScenePause", null, SendMessageOptions.DontRequireReceiver);
+		}
 	}
 	
 	public void Resume() {
 		Time.timeScale = mPrevTimeScale;
 		
 		BroadcastMessage("OnSceneResume", null, SendMessageOptions.DontRequireReceiver);
+		
+		if(mSceneController != null) {
+			mSceneController.BroadcastMessage("OnSceneResume", null, SendMessageOptions.DontRequireReceiver);
+		}
 	}
 	
 	/// <summary>
