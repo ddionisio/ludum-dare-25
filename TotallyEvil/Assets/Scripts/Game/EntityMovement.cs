@@ -37,6 +37,8 @@ public class EntityMovement : MonoBehaviour {
 	
 	private float mDX = 0;
 	
+	private EntityCollider mEntityCollider;
+	
 	public Vector2 dir {
 		get { return mDir; }
 	}
@@ -100,9 +102,9 @@ public class EntityMovement : MonoBehaviour {
 			}
 		}
 		
-		EntityCollider entCollider = GetComponent<EntityCollider>();
-		if(entCollider != null) {
-			entCollider.radius = radius;
+		mEntityCollider = GetComponent<EntityCollider>();
+		if(mEntityCollider != null) {
+			mEntityCollider.radius = radius;
 		}
 	}
 	
@@ -162,7 +164,7 @@ public class EntityMovement : MonoBehaviour {
 			
 			float dist = dPos.magnitude;
 			mDir = dPos/dist;
-															
+											
 			//adjust to ground
 			//for now it's flat
 			float newY = newPos.y + dPos.y;
@@ -187,28 +189,28 @@ public class EntityMovement : MonoBehaviour {
 				newPos.x = newPos.x + dPos.x;
 				newPos.y = newY;
 			}
-			
+								
 			//direction X changed
 			float dX = newPos.x - curPos.x;
 			if(dX != 0) {
 				if(mDX == 0) {
 					mDX = dX;
 				}
-				else {
-					float dirSignX = Mathf.Sign(dX);
-					if(Mathf.Sign(mDX) != dirSignX) {
-						mDX = dX;
-						
-						//orient sprite horizontally
-						if(orientXSprite != null && dirSignX != 0.0f) {
-							Vector3 s = orientXSprite.scale;
-							s.x = dirSignX*Mathf.Abs(s.x);
-						}
-						
-						//callback
-						if(onDirXChange != null) {
-							onDirXChange(this);
-						}
+				
+				float dirSignX = Mathf.Sign(dX);
+				if(Mathf.Sign(mDX) != dirSignX) {
+					mDX = dX;
+					
+					//orient sprite horizontally
+					if(orientXSprite != null && dirSignX != 0.0f) {
+						Vector3 s = orientXSprite.scale;
+						s.x = -dirSignX*Mathf.Abs(s.x);
+						orientXSprite.scale = s;
+					}
+					
+					//callback
+					if(onDirXChange != null) {
+						onDirXChange(this);
 					}
 				}
 			}

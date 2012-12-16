@@ -74,7 +74,7 @@ public class PlayerController : MonoBehaviour {
 		
 		mPlayer.guardActive = Input.GetButton("Guard");
 		
-		if(!mPlayer.guardActive && (!entMove.isGround || entMove.curSpeedSqr >= mMaxSpeedAttackSqr)) {
+		if(!mPlayer.guardActive && (entMove.curSpeedSqr >= mMaxSpeedAttackSqr)) {
 			mPlayer.state = Entity.State.attack; 
 		}
 		else {

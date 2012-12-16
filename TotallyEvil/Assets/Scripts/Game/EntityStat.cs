@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections;
 
 public class EntityStat : MonoBehaviour {
-	public delegate void OnHPChange(EntityStat stat);
+	public delegate void OnHPChange(EntityStat stat, float delta);
 	
 	public event OnHPChange hpChangeCallback;
 	
@@ -24,6 +24,7 @@ public class EntityStat : MonoBehaviour {
 		
 		set {
 			if(mCurHP != value) {
+				float prevHP = mCurHP;
 				mCurHP = value;
 				
 				if(mCurHP < 0) {
@@ -31,10 +32,14 @@ public class EntityStat : MonoBehaviour {
 				}
 				
 				if(hpChangeCallback != null) {
-					hpChangeCallback(this);
+					hpChangeCallback(this, value - prevHP);
 				}
 			}
 		}
+	}
+	
+	public virtual void ResetStats() {
+		mCurHP = _maxHP;
 	}
 	
 	protected virtual void Awake() {

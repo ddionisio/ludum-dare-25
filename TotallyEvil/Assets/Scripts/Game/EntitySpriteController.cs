@@ -53,7 +53,7 @@ public class EntitySpriteController : MonoBehaviour {
 		if(mIsBlink) {
 			mBlinkTime += Time.deltaTime;
 			if(mBlinkTime >= blinkDelay) {
-				mBlinkTime -= blinkDelay;
+				mBlinkTime = 0;
 				
 				Color c = mSprite.color;
 				c.a = c.a == 0.0f ? mPrevAlpha : 0.0f;

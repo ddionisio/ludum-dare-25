@@ -35,6 +35,20 @@ public class CameraBound : MonoBehaviour {
 		return pos;
 	}
 	
+	public Vector2 RandomLocation(float halfW, float halfH) {
+		float hWorldW = width*0.5f;
+		float hWorldH = height*0.5f;
+		
+		Vector2 ret = transform.position;
+		ret.x -= hWorldW*0.5f;
+		ret.y -= hWorldH*0.5f;
+		
+		ret.x = Random.Range(ret.x + halfW, ret.x + hWorldW - halfW);
+		ret.y = Random.Range(ret.y + halfH, ret.y + hWorldH - halfH);
+		
+		return ret;
+	}
+	
 	void OnDrawGizmos() {
 		Gizmos.color = Color.green;
 		Gizmos.DrawWireCube(transform.position, new Vector3(width*0.5f, height*0.5f, 0.1f));

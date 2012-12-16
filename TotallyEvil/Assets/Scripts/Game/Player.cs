@@ -8,6 +8,8 @@ public class Player : Entity {
 		public float delay;
 	}
 	
+	public float attackHitJumpSpd = 120;
+	
 	public GameObject thornsIdle;
 	public GameObject thornsAttack;
 			
@@ -59,6 +61,10 @@ public class Player : Entity {
 					sprB.scale = s;
 				}
 				
+				if(entCollider != null) {
+					entCollider.radius = mDefaultRadius*mScale;
+				}
+				
 				entMove.radius = mDefaultRadius*mScale;
 				entMove.maxSpeed = mDefaultMaxSpeed*mScale;
 				entMove.RefreshMaxSpdSqr();
@@ -85,6 +91,10 @@ public class Player : Entity {
 	
 	public int guardCurNum {
 		get { return mCurNumGuards; }
+	}
+	
+	public float curGuardRechargeTime {
+		get { return mCurGuardRechargeTime; }
 	}
 	
 	public void GuardDec() {
@@ -189,9 +199,37 @@ public class Player : Entity {
 	}
 	
 	void OnCollide(EntityCollider collider, RaycastHit hit) {
+		if(hit.transform.gameObject.layer == Main.layerEnemy) {
+			Enemy enemy = hit.transform.GetComponentInChildren<Enemy>();
+			if(enemy.state != State.die) {
+				EnemyStat enemyStat = enemy.stat != null ? enemy.stat as EnemyStat : null;
+												
+				if(state == State.attack
+					&& !enemy.isBlinking 
+					&& enemy.state != State.spawning
+					&& enemyStat != null) {
+					enemyStat.curHP -= stat.damage;
+				}
+				
+				if(enemyStat != null && enemyStat.level >= SceneWorld.instance.curLevel) {
+					Vector3 enemyPos = hit.transform.position;
+					Vector3 pos = transform.position;
+													
+					if(pos.y > enemyPos.y) {
+						entMove.Jump(attackHitJumpSpd*mScale, false);
+					}
+					else {
+						entMove.ResetCurYVel();
+						entMove.Jump(-attackHitJumpSpd*mScale, false);
+					}
+				}
+			}
+		}
+		else if(hit.transform.gameObject.layer == Main.layerEnemyProjectile) {
+		}
 	}
 	
-	void OnHPChange(EntityStat stat) {
+	void OnHPChange(EntityStat stat, float delta) {
 		PlayerStat pstat = (PlayerStat)stat;
 		
 		if(pstat.curHP == 0) {

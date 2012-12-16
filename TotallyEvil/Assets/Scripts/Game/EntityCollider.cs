@@ -2,6 +2,9 @@ using UnityEngine;
 using System.Collections;
 
 public class EntityCollider : MonoBehaviour {
+	public const float collisionCastZ = -1000.0f;
+	public const float collisionDistance = 2000.0f;
+	
 	public delegate void OnCollide(EntityCollider collider, RaycastHit hit);
 	
 	public event OnCollide collideCallback;
@@ -25,13 +28,17 @@ public class EntityCollider : MonoBehaviour {
 		}
 	}
 	
-	public void DoCollision(Vector3 pos, Vector3 dir, float dist) {
+	public bool DoCollision(Vector3 pos, Vector3 dir, float dist) {
 		RaycastHit hit;
 		if(Physics.SphereCast(pos, mRadius, dir, out hit, dist, mLayerMasks)) {
 			if(collideCallback != null) {
 				collideCallback(this, hit);
 			}
+			
+			return true;
 		}
+		
+		return false;
 	}
 
 	// Use this for initialization
@@ -41,6 +48,10 @@ public class EntityCollider : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-	
+		if(mLayerMasks > 0) {
+			Vector3 castPos = transform.position;
+			castPos.z = collisionCastZ;
+			DoCollision(castPos, Vector3.forward, collisionDistance);
+		}
 	}
 }
