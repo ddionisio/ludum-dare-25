@@ -5,3 +5,7 @@
 *.sln
 /TotallyEvil/Temp
 /TotallyEvil/Library
+/TotallyEvil/Assets/NGUI
+/TotallyEvil/Assets/TK2DROOT
+/TotallyEvil/Assets/NGUI.meta
+/TotallyEvil/Assets/TK2DROOT.meta
