@@ -1,0 +1,13 @@
+{ "$type":"Sequencer",
+	"loop":true,
+	"actions": [
+		{ "$type":"AISetMeleeMode", "delay":"0.1", "mode":"OnNoOrient" },
+		
+		{ "$type":"AIMoveRandom",
+			"minSpeed":"340",
+			"maxSpeed":"480"
+		},
+		
+		{ "$type":"SequencerAction", "delay":"1" }
+	]
+}

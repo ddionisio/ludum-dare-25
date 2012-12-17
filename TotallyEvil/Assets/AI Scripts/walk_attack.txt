@@ -1,0 +1,33 @@
+{ "$type":"Sequencer",
+	"loop":true,
+	"actions": [
+		{ "$type":"AIMoveRandom", "delay":"0.1",
+			"minSpeed":"120",
+			"maxSpeed":"200"
+		},
+		
+		{ "$type":"AISetMeleeMode", "delay":"0.15", "mode":"On" },
+		
+		{ "$type":"AIMoveToPlayer",
+			"minSpeed":"165",
+			"maxSpeed":"210"
+		},
+		
+		{ "$type":"AIMoveToPlayer", "delay":"0.1",
+			"minSpeed":"165",
+			"maxSpeed":"210"
+		},
+		
+		{ "$type":"AIMoveToPlayer", "delay":"0.1",
+			"minSpeed":"165",
+			"maxSpeed":"210"
+		},
+		
+		{ "$type":"AIMoveToPlayer", "delay":"0.1",
+			"minSpeed":"165",
+			"maxSpeed":"210"
+		},
+		
+		{ "$type":"AISetMeleeMode", "delay":"0.25", "mode":"Off" }
+	]
+}

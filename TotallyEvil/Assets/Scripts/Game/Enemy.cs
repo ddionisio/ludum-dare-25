@@ -11,7 +11,9 @@ public class Enemy : Entity {
 	public enum Melee {
 		Off,
 		PointToPlayer,
-		PointToDir
+		PointToDir,
+		On,
+		OnNoOrient
 	}
 	
 	public string[] afterSpawnAIState;
@@ -42,6 +44,8 @@ public class Enemy : Entity {
 					
 				case Melee.PointToDir:
 				case Melee.PointToPlayer:
+				case Melee.On:
+				case Melee.OnNoOrient:
 					mMelee.gameObject.SetActiveRecursively(true);
 					break;
 				}
@@ -119,6 +123,10 @@ public class Enemy : Entity {
 		switch(state) {
 		case State.spawning:
 			meleeMode = Melee.Off;
+			
+			if(mMelee != null) {
+				mMelee.transform.localScale = Vector3.one;
+			}
 			break;
 			
 		case State.die:
@@ -140,6 +148,10 @@ public class Enemy : Entity {
 		
 		if(stat != null) {
 			stat.hpChangeCallback += OnHPChange;
+		}
+		
+		if(entMove != null) {
+			entMove.onDirXChange += onDirXChange;
 		}
 		
 		//projectiles within enemies are considered melees
@@ -191,6 +203,20 @@ public class Enemy : Entity {
 		}
 		else if(delta < 0) {
 			Blink(hurtDelay);
+		}
+	}
+	
+	void onDirXChange(EntityMovement em) {
+		if(mMelee != null) {
+			switch(mMeleeMode) {
+			case Melee.On:
+				if(em.orientXSprite != null) {
+					Vector3 s = mMelee.transform.localScale;
+					s.x = Mathf.Sign(em.orientXSprite.scale.x);
+					mMelee.transform.localScale = s;
+				}
+				break;
+			}
 		}
 	}
 }

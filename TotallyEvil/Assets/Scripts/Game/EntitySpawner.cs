@@ -12,6 +12,11 @@ public class EntitySpawner : MonoBehaviour {
 	
 	public int maxActive = 1;
 	
+	public bool criteriaActivate = false; //(de)activate via criterias
+	public int criteriaMinLevel = 0;
+	public int criteriaMaxLevel = 0;
+	public float criteriaPlayerLevelPtsScale = 0;
+	
 	enum State {
 		Inactive,
 		Spawn,
@@ -33,7 +38,7 @@ public class EntitySpawner : MonoBehaviour {
 	}
 	
 	void Start() {
-		if(activeOnStart && mSceneActive) {
+		if(activeOnStart && mSceneActive && !criteriaActivate) {
 			Activate(true);
 		}
 	}
@@ -61,6 +66,34 @@ public class EntitySpawner : MonoBehaviour {
 	}
 	
 	void Update() {
+		/*public bool criteriaActivate = false; //(de)activate via criterias
+	public int criteriaMinLevel = 0;
+	public int criteriaMaxLevel = 0;
+	public float criteriaPlayerLevelPtsScale = 0;*/
+		if(criteriaActivate) {
+			bool active = false;
+			
+			SceneWorld sw = SceneWorld.instance;
+			if(sw != null) {
+				active = sw.curLevel >= criteriaMinLevel && sw.curLevel <= criteriaMaxLevel;
+			}
+			
+			Player p = Player.instance;
+			if(p != null) {
+				PlayerStat ps = (PlayerStat)p.stat;
+				active = active && (sw.curLevel > criteriaMinLevel || (ps.curLevelPts/ps.maxLevelPts) >= criteriaPlayerLevelPtsScale);
+			}
+			
+			if(active) {
+				if(mCurState == State.Inactive)
+					Activate(active);
+			}
+			else {
+				if(mCurState != State.Inactive)
+					Activate(active);
+			}
+		}
+		
 		switch(mCurState) {
 		case State.Inactive:
 			break;

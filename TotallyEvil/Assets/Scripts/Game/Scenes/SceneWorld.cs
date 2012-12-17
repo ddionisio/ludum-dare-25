@@ -102,11 +102,7 @@ public class SceneWorld : SceneController {
 				CameraController.instance.scale = s;
 			}
 		}
-		
-		if(Input.GetKeyDown(KeyCode.F1)) {
-			curLevel = curLevel+1;
-		}
-		
+		z
 		if(Input.GetButtonDown("Menu")) {
 			UIModalManager uimgr = UIModalManager.instance;
 			if(uimgr.ModalGetTop() == UIModalManager.Modal.GameOptions) {

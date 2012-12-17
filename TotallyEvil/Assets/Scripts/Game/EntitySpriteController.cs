@@ -14,6 +14,10 @@ public class EntitySpriteController : MonoBehaviour {
 	private bool mIsBlink = false;
 	private float mBlinkTime = 0;
 	
+	public tk2dBaseSprite sprite {
+		get { return mSprite; }
+	}
+	
 	protected bool HasAnim(Entity.State s) {
 		return mStateAnimIds[(int)s] != -1;
 	}

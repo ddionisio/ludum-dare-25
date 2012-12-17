@@ -166,6 +166,16 @@ public class Entity : MonoBehaviour {
 	IEnumerator DoSpawn() {
 		yield return new WaitForFixedUpdate();
 		
+		//some blinks are glitched
+		EntitySpriteController[] escs = GetComponentsInChildren<EntitySpriteController>(true);
+		foreach(EntitySpriteController esc in escs) {
+			if(esc.sprite != null) {
+				Color c = esc.sprite.color;
+				c.a = 1.0f;
+				esc.sprite.color = c;
+			}
+		}
+		
 		if(mEntMove != null) {
 			mEntMove.ResetAll();
 		}

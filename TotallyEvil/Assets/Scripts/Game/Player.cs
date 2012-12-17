@@ -234,9 +234,7 @@ public class Player : Entity {
 				EnemyStat enemyStat = enemy.stat != null ? enemy.stat as EnemyStat : null;
 				if(enemyStat != null) {
 					if(state == State.attack) {
-						if(!isBlinking
-							&& !enemy.isBlinking 
-							&& enemy.state != State.spawning) {
+						if(!enemy.isBlinking && enemy.state != State.spawning) {
 							enemyStat.curHP -= stat.damage;
 						}
 					}
