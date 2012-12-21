@@ -28,6 +28,18 @@
 			"maxSpeed":"210"
 		},
 		
-		{ "$type":"AISetMeleeMode", "delay":"0.25", "mode":"Off" }
+		{ "$type":"AISetMeleeMode", "delay":"0.1", "mode":"Off" }
+		
+		{ "$type":"AIMoveRandom", "delay":"0.1",
+			"minSpeed":"100",
+			"maxSpeed":"140"
+		},
+		
+		{ "$type":"SequencerAction", "delay":"0.25" }
+		
+		{ "$type":"AIJump", "delay":"0.1",
+			"speedMin":"128",
+			"speedMax":"220"
+		}
 	]
 }

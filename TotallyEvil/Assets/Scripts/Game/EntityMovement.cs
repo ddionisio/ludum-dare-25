@@ -10,6 +10,7 @@ public class EntityMovement : MonoBehaviour {
 	public bool applyOrientation = true;
 	public bool capToWorld = true;
 	public bool capToCameraBounds = true;
+	public bool wrapOnBounds = false;
 	
 	public tk2dBaseSprite orientXSprite = null; //for horizontal orientation
 	
@@ -221,8 +222,8 @@ public class EntityMovement : MonoBehaviour {
 			if(capToCameraBounds) {
 				CameraBound camBound = CameraController.instance.bound;
 				if(camBound != null) {
-					Vector3 capPos = camBound.Cap(pos, radius, radius);
-					if(capPos != pos) {
+					Vector3 capPos = camBound.Cap(pos, radius, radius, wrapOnBounds);
+					if(capPos != pos && !wrapOnBounds) {
 						accel = velocity = Vector2.zero;
 					}
 					

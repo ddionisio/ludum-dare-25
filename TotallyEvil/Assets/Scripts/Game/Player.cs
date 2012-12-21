@@ -277,14 +277,7 @@ public class Player : Entity {
 				GuardDec();
 			}
 			else {
-				//decrease from points first
-				PlayerStat ps = (PlayerStat)stat;
-				if(ps.curLevelPts > 0) {
-					ps.curLevelPts -= hurtAmt;
-				}
-				else {
-					stat.curHP -= hurtAmt;
-				}
+				stat.curHP -= hurtAmt;
 			}
 		}
 	}

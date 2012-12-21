@@ -74,7 +74,5 @@ public class Main : MonoBehaviour {
 			sceneManager.InitScene();
 		}
 		
-		//gonna lower the volume so your ears won't bleed from the terrible music ;)
-		AudioListener.volume = 0.05f;
 	}
 }

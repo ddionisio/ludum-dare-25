@@ -28,7 +28,12 @@
 			"speedMax":"220"
 		},
 		
-		{ "$type":"AISetVelocity", "delay":"0.25" }
-		{ "$type":"AISetMeleeMode", "delay":"0.25", "mode":"Off" }
+		{ "$type":"AISetVelocity", "delay":"0.15" },
+		{ "$type":"AISetMeleeMode", "delay":"0.1", "mode":"Off" },
+		
+		{ "$type":"AIMoveRandom", "delay":"0.1",
+			"minSpeed":"120",
+			"maxSpeed":"200"
+		}
 	]
 }

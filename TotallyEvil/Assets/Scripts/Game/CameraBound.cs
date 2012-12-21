@@ -8,7 +8,7 @@ public class CameraBound : MonoBehaviour {
 	
 	public Vector3 point;
 	
-	public Vector3 Cap(Vector3 center, float halfW, float halfH) {
+	public Vector3 Cap(Vector3 center, float halfW, float halfH, bool wrap=false) {
 		Vector3 pos = center;
 		
 		float hWorldW = width*0.5f;
@@ -19,10 +19,20 @@ public class CameraBound : MonoBehaviour {
 		wPos.y -= hWorldH*0.5f;
 		
 		if(pos.x - halfW < wPos.x) {
-			pos.x = wPos.x + halfW;
+			if(wrap) {
+				pos.x = wPos.x + hWorldW - halfW;
+			}
+			else {
+				pos.x = wPos.x + halfW;
+			}
 		}
 		else if(pos.x + halfW > wPos.x + hWorldW) {
-			pos.x = wPos.x + hWorldW - halfW;
+			if(wrap) {
+				pos.x = wPos.x + halfW;
+			}
+			else {
+				pos.x = wPos.x + hWorldW - halfW;
+			}
 		}
 		
 		if(pos.y - halfH < wPos.y) {
