@@ -1,7 +1,7 @@
 ludum-dare-25: Play As A Villain
 ================================
 
-Let's Fly, Evil Style.
+Satan's Booger
 
 ##Platform
 * Unity Web Player
